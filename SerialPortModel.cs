@@ -1,72 +1,80 @@
 ﻿using System;
-using System.IO.Ports;
-using System.Text;
-using System.Threading;
-using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO.Ports;
+using System.ComponentModel;
+using System.Threading;
 
 namespace Network_Serial_Ports
 {
-    public delegate void SerialPortEventHandler(object sender, SerialPortEventArgs e);
+    public delegate void SerialPortEventHandler(Object sender, SerialPortEventArgs e);
 
     public class SerialPortEventArgs : EventArgs
     {
-        public bool IsOpen { get; set; }
-        public byte[] ReceivedBytes { get; set; }
+        public bool isOpend = false;
+        public Byte[] receivedBytes = null;
     }
 
-    public class SerialPortModel : IDisposable
+    public class SerialPortModel
     {
         private SerialPort sp = new SerialPort();
 
-        public event SerialPortEventHandler ComReceiveDataEvent;
-        public event SerialPortEventHandler ComOpenEvent;
-        public event SerialPortEventHandler ComCloseEvent;
+        public event SerialPortEventHandler comReceiveDataEvent = null;
+        public event SerialPortEventHandler comOpenEvent = null;
+        public event SerialPortEventHandler comCloseEvent = null;
 
-        public bool IsOpen => sp.IsOpen;
-
-        public List<string> ScanSerialPorts() => new List<string>(SerialPort.GetPortNames());
+        private Object thisLock = new Object();
 
         private void DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-            if (sp.BytesToRead <= 0) return;
+            if (sp.BytesToRead <= 0)
+            {
+                return;
+            }
 
-            var args = new SerialPortEventArgs();
-
-            try
+            lock (thisLock)
             {
                 int len = sp.BytesToRead;
-                var buff = new byte[len];
-                sp.Read(buff, 0, len);
+                Byte[] data = new Byte[len];
+                try
+                {
+                    sp.Read(data, 0, len);
+                }
+                catch (System.Exception)
+                {
+                    //catch read exception
+                }
+                SerialPortEventArgs args = new SerialPortEventArgs();
+                args.receivedBytes = data;
+                if (comReceiveDataEvent != null)
+                {
+                    comReceiveDataEvent.Invoke(this, args);
 
-                args.ReceivedBytes = buff;
-
-                ComReceiveDataEvent?.Invoke(this, args);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-                args.IsOpen = false;
-                ComCloseEvent?.Invoke(this, args);
+                }
             }
         }
 
-        public bool DataSend(byte[] bytes)
+        public bool DataSend(Byte[] bytes)
         {
-            if (!sp.IsOpen) return false;
+            if (!sp.IsOpen)
+            {
+                return false;
+            }
 
             try
             {
                 sp.Write(bytes, 0, bytes.Length);
-                return true;
             }
-            catch (Exception)
+            catch (System.Exception)
             {
-                return false;
+                return false;   //write failed
             }
+            return true;        //write successfully
         }
 
-        public void Open(string portName, string baudRate,
+
+        public void Open(string portName, String baudRate,
             string dataBits, string stopBits, string parity,
             string handshake)
         {
@@ -74,59 +82,63 @@ namespace Network_Serial_Ports
             {
                 Close();
             }
-
             sp.PortName = portName;
             sp.BaudRate = Convert.ToInt32(baudRate);
             sp.DataBits = Convert.ToInt16(dataBits);
 
             if (handshake == "None")
             {
+                //Never delete this property
                 sp.RtsEnable = true;
                 sp.DtrEnable = true;
             }
 
-            var args = new SerialPortEventArgs();
+            SerialPortEventArgs args = new SerialPortEventArgs();
             try
             {
                 sp.StopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
                 sp.Parity = (Parity)Enum.Parse(typeof(Parity), parity);
                 sp.Handshake = (Handshake)Enum.Parse(typeof(Handshake), handshake);
-                sp.WriteTimeout = 1000;
+                sp.WriteTimeout = 1000; /*Write time out*/
                 sp.Open();
-                sp.DataReceived += DataReceived;
-                args.IsOpen = true;
+                sp.DataReceived += new SerialDataReceivedEventHandler(DataReceived);
+                args.isOpend = true;
             }
-            catch (Exception)
+            catch (System.Exception)
             {
-                args.IsOpen = false;
+                args.isOpend = false;
             }
-            ComOpenEvent?.Invoke(this, args);
+            if (comOpenEvent != null)
+            {
+                comOpenEvent.Invoke(this, args);
+            }
+
         }
 
         public void Close()
         {
-            var closeThread = new Thread(CloseSpThread);
+            Thread closeThread = new Thread(new ThreadStart(CloseSpThread));
             closeThread.Start();
         }
-
         private void CloseSpThread()
         {
-            var args = new SerialPortEventArgs { IsOpen = false };
+            SerialPortEventArgs args = new SerialPortEventArgs();
+            args.isOpend = false;
             try
             {
                 sp.Close();
-                sp.DataReceived -= DataReceived;
+                sp.DataReceived -= new SerialDataReceivedEventHandler(DataReceived);
             }
             catch (Exception)
             {
-                args.IsOpen = true;
+                args.isOpend = true;
             }
-            ComCloseEvent?.Invoke(this, args);
+            if (comCloseEvent != null)
+            {
+                comCloseEvent.Invoke(this, args);
+            }
+
         }
 
-        public void Dispose()
-        {
-            sp.Dispose();
-        }
     }
 }

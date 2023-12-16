@@ -41,7 +41,15 @@
             this.stopBits_lbl = new System.Windows.Forms.Label();
             this.dataBits_lbl = new System.Windows.Forms.Label();
             this.stopBits_cbx = new System.Windows.Forms.ComboBox();
+            this.statusStrip = new System.Windows.Forms.StatusStrip();
+            this.status_lbl = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.statusTimeLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.send_btn = new System.Windows.Forms.Button();
+            this.rx_label = new System.Windows.Forms.ToolStripStatusLabel();
+            this.tx_label = new System.Windows.Forms.ToolStripStatusLabel();
             this.com_gbox.SuspendLayout();
+            this.statusStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // com_gbox
@@ -79,12 +87,13 @@
             this.open_btn.Enabled = false;
             this.open_btn.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.open_btn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.open_btn.Location = new System.Drawing.Point(424, 41);
+            this.open_btn.Location = new System.Drawing.Point(424, 39);
             this.open_btn.Name = "open_btn";
             this.open_btn.Size = new System.Drawing.Size(68, 22);
             this.open_btn.TabIndex = 17;
             this.open_btn.Text = "Open";
             this.open_btn.UseVisualStyleBackColor = true;
+            this.open_btn.Click += new System.EventHandler(this.open_btn_Click);
             // 
             // port_name_lbl
             // 
@@ -97,7 +106,7 @@
             // 
             // refresh_btn
             // 
-            this.refresh_btn.Location = new System.Drawing.Point(366, 40);
+            this.refresh_btn.Location = new System.Drawing.Point(366, 38);
             this.refresh_btn.Name = "refresh_btn";
             this.refresh_btn.Size = new System.Drawing.Size(52, 23);
             this.refresh_btn.TabIndex = 22;
@@ -176,16 +185,80 @@
             this.stopBits_cbx.Size = new System.Drawing.Size(65, 21);
             this.stopBits_cbx.TabIndex = 30;
             // 
-            // Form1
+            // statusStrip
+            // 
+            this.statusStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.status_lbl,
+            this.toolStripStatusLabel1,
+            this.tx_label,
+            this.rx_label,
+            this.statusTimeLabel});
+            this.statusStrip.Location = new System.Drawing.Point(0, 278);
+            this.statusStrip.Name = "statusStrip";
+            this.statusStrip.Size = new System.Drawing.Size(522, 22);
+            this.statusStrip.TabIndex = 26;
+            this.statusStrip.Text = "statusStrip";
+            // 
+            // status_lbl
+            // 
+            this.status_lbl.ActiveLinkColor = System.Drawing.SystemColors.ButtonHighlight;
+            this.status_lbl.Font = new System.Drawing.Font("Segoe UI", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.status_lbl.Name = "status_lbl";
+            this.status_lbl.Size = new System.Drawing.Size(411, 17);
+            this.status_lbl.Spring = true;
+            this.status_lbl.Text = "Not Connected";
+            this.status_lbl.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // toolStripStatusLabel1
+            // 
+            this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(0, 17);
+            // 
+            // statusTimeLabel
+            // 
+            this.statusTimeLabel.Name = "statusTimeLabel";
+            this.statusTimeLabel.Size = new System.Drawing.Size(0, 17);
+            // 
+            // send_btn
+            // 
+            this.send_btn.Enabled = false;
+            this.send_btn.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.send_btn.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.send_btn.Location = new System.Drawing.Point(436, 139);
+            this.send_btn.Name = "send_btn";
+            this.send_btn.Size = new System.Drawing.Size(68, 22);
+            this.send_btn.TabIndex = 34;
+            this.send_btn.Text = "Send";
+            this.send_btn.UseVisualStyleBackColor = true;
+            this.send_btn.Click += new System.EventHandler(this.send_btn_Click);
+            // 
+            // rx_label
+            // 
+            this.rx_label.Name = "rx_label";
+            this.rx_label.Size = new System.Drawing.Size(33, 17);
+            this.rx_label.Text = "RX: 0";
+            // 
+            // tx_label
+            // 
+            this.tx_label.Name = "tx_label";
+            this.tx_label.Size = new System.Drawing.Size(32, 17);
+            this.tx_label.Text = "TX: 0";
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(522, 534);
+            this.ClientSize = new System.Drawing.Size(522, 300);
+            this.Controls.Add(this.send_btn);
+            this.Controls.Add(this.statusStrip);
             this.Controls.Add(this.com_gbox);
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.Text = "Network Serial Ports";
             this.com_gbox.ResumeLayout(false);
+            this.statusStrip.ResumeLayout(false);
+            this.statusStrip.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -204,6 +277,13 @@
         private System.Windows.Forms.Label stopBits_lbl;
         private System.Windows.Forms.Label dataBits_lbl;
         private System.Windows.Forms.ComboBox stopBits_cbx;
+        private System.Windows.Forms.StatusStrip statusStrip;
+        private System.Windows.Forms.ToolStripStatusLabel status_lbl;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+        private System.Windows.Forms.ToolStripStatusLabel statusTimeLabel;
+        private System.Windows.Forms.Button send_btn;
+        private System.Windows.Forms.ToolStripStatusLabel tx_label;
+        private System.Windows.Forms.ToolStripStatusLabel rx_label;
     }
 }
 
